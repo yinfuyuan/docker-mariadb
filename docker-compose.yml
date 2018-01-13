@@ -1,0 +1,15 @@
+
+version: '3.3'
+
+services:
+
+  mariadb-10.2.12:
+    container_name: mariadb-10.2.12
+    build:
+      context: ./services/mariadb/10.2/alpine
+    image: mariadb:10.2.12-alpine
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: example
+      MYSQL_PASSWORD: example
+      MYSQL_DATABASE: example
