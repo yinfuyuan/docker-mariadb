@@ -19,24 +19,14 @@ RUN set -x; \
     \
 	apk add --no-cache --virtual .build-deps \
         cmake \
-        curl \
-        g++ \
-        gcc \
-        gnupg \
-        gnutls \
-        gnutls-dev \
-        libaio-dev \
-        libc-dev \
-        libedit-dev \
-        linux-headers \
         make \
-        perl \
-        rpcgen \
-        libtirpc \
-        ncurses \
-        jemalloc \
+        gcc \
+        g++ \
+        linux-headers \
+        gnutls-dev \
+        ncurses-dev \
         jemalloc-dev \
-        pwgen; \
+        libexecinfo-dev; \
     \
     wget -O mariadb-${MARIADB_VERSION}.tar.gz "${MARIADB_DOWNLOAD_URL}"; \
     \
@@ -45,13 +35,15 @@ RUN set -x; \
     rm mariadb-${MARIADB_VERSION}.tar.gz; \
     \
     cd /usr/src/mariadb-${MARIADB_VERSION}; \
-    cmake . -DBUILD_CONFIG=mysql_release; \
+    cmake . \
+        -DWITHOUT_TOKUDB=1 \
+        -DWITH_DEBUG=0; \
     \
     make; \
     make install; \
-#    rm -r /usr/src/mariadb-${MARIADB_VERSION}; \
-#    \
-#    apk del .build-deps
+    rm -r /usr/src/mariadb-${MARIADB_VERSION}; \
+    \
+    apk del .build-deps
 
 #EXPOSE 3306
 #CMD ["mysqld"]
