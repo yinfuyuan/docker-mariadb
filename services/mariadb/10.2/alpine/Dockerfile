@@ -6,7 +6,7 @@ MAINTAINER yinfuyuan <yinfuyuan@gmail.com>
 RUN addgroup -S mysql && adduser -S -G mysql mysql
 
 # grab su-exec for easy step-down from root
-RUN apk add --no-cache 'su-exec>=0.2'
+#RUN apk add --no-cache 'su-exec>=0.2'
 
 #RUN mkdir /docker-entrypoint-initdb.d
 
@@ -17,16 +17,20 @@ ENV MARIADB_DOWNLOAD_URL="http://mirrors.neusoft.edu.cn/mariadb//mariadb-${MARIA
 
 RUN set -x; \
     \
-	apk add --no-cache --virtual .build-deps \
-        cmake \
-        make \
-        gcc \
-        g++ \
+	apk add --no-cache \
         linux-headers \
         gnutls-dev \
         ncurses-dev \
         jemalloc-dev \
-        libexecinfo-dev; \
+        libexecinfo-dev
+
+RUN set -x; \
+    \
+	apk add --no-cache --virtual .build-deps \
+        cmake \
+        make \
+        gcc \
+        g++; \
     \
     wget -O mariadb-${MARIADB_VERSION}.tar.gz "${MARIADB_DOWNLOAD_URL}"; \
     \
@@ -36,8 +40,11 @@ RUN set -x; \
     \
     cd /usr/src/mariadb-${MARIADB_VERSION}; \
     cmake . \
-        -DWITHOUT_TOKUDB=1 \
-        -DWITH_DEBUG=0; \
+        -DCMAKE_BUILD_TYPE=MinSizeRel \
+        -DWITH_UNIT_TESTS=OFF \
+        -DCONC_WITH_UNIT_TESTS=OFF \
+        -DWITH_MARIABACKUP=OFF \
+        -DWITHOUT_TOKUDB=1; \
     \
     make; \
     make install; \
