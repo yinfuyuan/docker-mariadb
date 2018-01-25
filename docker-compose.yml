@@ -7,7 +7,7 @@ services:
     container_name: mariadb-10.2.12
     build:
       context: ./services/mariadb/10.2/alpine
-    image: mariadb:10.2.12-alpine
+    image: yinfuyuan/mariadb:10.2.12-alpine
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: example

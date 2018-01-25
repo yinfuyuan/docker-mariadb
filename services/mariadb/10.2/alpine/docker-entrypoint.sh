@@ -1,6 +1,10 @@
 #!/bin/bash
+
+#########################################################################################
+# source: https://github.com/docker-library/mariadb/blob/master/10.2/docker-entrypoint.sh
+#########################################################################################
+
 set -eo pipefail
-shopt -s nullglob
 
 # if command starts with an option, prepend mysqld
 if [ "${1:0:1}" = '-' ]; then

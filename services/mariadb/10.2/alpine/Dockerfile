@@ -5,11 +5,6 @@ MAINTAINER yinfuyuan <yinfuyuan@gmail.com>
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN addgroup -S mysql && adduser -S -G mysql mysql
 
-# grab su-exec for easy step-down from root
-#RUN apk add --no-cache 'su-exec>=0.2'
-
-#RUN mkdir /docker-entrypoint-initdb.d
-
 ENV MARIADB_MAJOR="10.2" \
     MARIADB_VERSION="10.2.12"
 
@@ -17,20 +12,16 @@ ENV MARIADB_DOWNLOAD_URL="http://mirrors.neusoft.edu.cn/mariadb//mariadb-${MARIA
 
 RUN set -x; \
     \
-	apk add --no-cache \
-        linux-headers \
-        gnutls-dev \
-        ncurses-dev \
-        jemalloc-dev \
-        libexecinfo-dev
-
-RUN set -x; \
-    \
 	apk add --no-cache --virtual .build-deps \
         cmake \
         make \
         gcc \
-        g++; \
+        g++ \
+        linux-headers \
+        gnutls-dev \
+        ncurses-dev \
+        jemalloc-dev \
+        libexecinfo-dev; \
     \
     wget -O mariadb-${MARIADB_VERSION}.tar.gz "${MARIADB_DOWNLOAD_URL}"; \
     \
@@ -41,8 +32,7 @@ RUN set -x; \
     cd /usr/src/mariadb-${MARIADB_VERSION}; \
     cmake . \
         -DCMAKE_BUILD_TYPE=MinSizeRel \
-        -DWITH_UNIT_TESTS=OFF \
-        -DCONC_WITH_UNIT_TESTS=OFF \
+        -DMYSQLTESTDIR= \
         -DWITH_MARIABACKUP=OFF \
         -DWITHOUT_TOKUDB=1; \
     \
@@ -52,5 +42,10 @@ RUN set -x; \
     \
     apk del .build-deps
 
+#COPY docker-entrypoint.sh /usr/local/bin/
+
+#ENTRYPOINT ["docker-entrypoint.sh"]
+
 #EXPOSE 3306
+
 #CMD ["mysqld"]
