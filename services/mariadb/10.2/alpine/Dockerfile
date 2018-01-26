@@ -6,11 +6,17 @@ MAINTAINER yinfuyuan <yinfuyuan@gmail.com>
 RUN addgroup -S mysql && adduser -S -G mysql mysql
 
 ENV MARIADB_MAJOR="10.2" \
-    MARIADB_VERSION="10.2.12"
+    MARIADB_VERSION="10.2.12" \
+    MARIADB_HOME="/usr/local/mysql" \
+    MYSQL_HOME="/usr/local/mysql"
 
-ENV MARIADB_DOWNLOAD_URL="http://mirrors.neusoft.edu.cn/mariadb//mariadb-${MARIADB_VERSION}/source/mariadb-${MARIADB_VERSION}.tar.gz"
+ENV PATH=$PATH:${MYSQL_HOME}/bin \
+    MARIADB_DOWNLOAD_URL="http://mirrors.neusoft.edu.cn/mariadb//mariadb-${MARIADB_VERSION}/source/mariadb-${MARIADB_VERSION}.tar.gz" \
+    MARIADB_DOWNLOAD_SHA="2ab22d7fbacfabc30fe18f71a8afb173250074502d889457e3cde2e203d341ec"
 
 RUN set -x; \
+    \
+    apk add --no-cache gnutls-dev; \
     \
 	apk add --no-cache --virtual .build-deps \
         cmake \
@@ -18,12 +24,13 @@ RUN set -x; \
         gcc \
         g++ \
         linux-headers \
-        gnutls-dev \
         ncurses-dev \
         jemalloc-dev \
         libexecinfo-dev; \
     \
     wget -O mariadb-${MARIADB_VERSION}.tar.gz "${MARIADB_DOWNLOAD_URL}"; \
+    \
+    echo "${MARIADB_DOWNLOAD_SHA} mariadb-${MARIADB_VERSION}.tar.gz" | sha256sum -c -; \
     \
     mkdir -p /usr/src; \
     tar -xzf mariadb-${MARIADB_VERSION}.tar.gz -C /usr/src; \
@@ -32,7 +39,7 @@ RUN set -x; \
     cd /usr/src/mariadb-${MARIADB_VERSION}; \
     cmake . \
         -DCMAKE_BUILD_TYPE=MinSizeRel \
-        -DMYSQLTESTDIR= \
+        -DINSTALL_MYSQLTESTDIR= \
         -DWITH_MARIABACKUP=OFF \
         -DWITHOUT_TOKUDB=1; \
     \
@@ -42,10 +49,10 @@ RUN set -x; \
     \
     apk del .build-deps
 
-#COPY docker-entrypoint.sh /usr/local/bin/
+COPY docker-entrypoint.sh /usr/local/bin/
 
-#ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
 
-#EXPOSE 3306
+EXPOSE 3306
 
-#CMD ["mysqld"]
+CMD ["mysqld"]
